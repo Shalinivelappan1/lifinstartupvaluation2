@@ -212,3 +212,19 @@ st.download_button(
     df.to_csv(index=False),
     "valuation_results.csv"
 )
+st.subheader("🧠 How Valuation is Computed")
+
+st.markdown("""
+**Valuation Logic:**
+
+Valuation = Market Size × Market Share × Margin × Multiple × Probability of Success
+
+**Example:**
+- Market = ₹10,000 Cr  
+- Market Share = 5% → ₹500 Cr  
+- Margin = 20% → ₹100 Cr profit  
+- Multiple = 15× → ₹1,500 Cr  
+- Success Probability = 60% → ₹900 Cr  
+
+We simulate this many times with uncertainty to generate a distribution.
+""")
