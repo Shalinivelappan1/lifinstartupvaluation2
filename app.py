@@ -31,7 +31,7 @@ def simulate(TAM, growth_mean, growth_std, market_share_mean,
     return np.array(vals)
 
 # -----------------------------
-# SIDEBAR GLOBAL INPUTS
+# GLOBAL INPUTS
 # -----------------------------
 st.sidebar.header("📊 Global Assumptions")
 
@@ -70,7 +70,9 @@ A_inputs = startup_inputs("Startup A")
 B_inputs = startup_inputs("Startup B")
 C_inputs = startup_inputs("Startup C")
 
-# Run simulations
+# -----------------------------
+# RUN SIMULATION
+# -----------------------------
 vals_A = simulate(*A_inputs, multiple, prob_success, simulations)
 vals_B = simulate(*B_inputs, multiple, prob_success, simulations)
 vals_C = simulate(*C_inputs, multiple, prob_success, simulations)
@@ -110,7 +112,7 @@ show(col2, "Startup B", mB)
 show(col3, "Startup C", mC)
 
 # -----------------------------
-# RANKINGS
+# MODEL RANKINGS
 # -----------------------------
 labels = ["Startup A", "Startup B", "Startup C"]
 means = [mA[1], mB[1], mC[1]]
@@ -125,7 +127,7 @@ st.success(f"Highest Expected Value: {labels[best]}")
 st.info(f"Best Risk-Adjusted Return: {labels[best_risk]}")
 
 # -----------------------------
-# PLOT
+# DISTRIBUTION PLOT
 # -----------------------------
 st.subheader("📈 Valuation Distributions")
 
@@ -145,7 +147,7 @@ st.pyplot(fig)
 # -----------------------------
 st.subheader("💰 Your Decision")
 
-chosen = st.radio("Which startup would you invest in?", ["Startup A", "Startup B", "Startup C"])
+chosen = st.radio("Which startup would you invest in?", labels)
 
 if chosen != labels[best]:
     st.warning("⚠️ Your choice differs from model (Possible Bias)")
@@ -153,15 +155,39 @@ else:
     st.success("✅ Your choice aligns with model")
 
 # -----------------------------
-# PORTFOLIO ALLOCATION
+# SAFE ALLOCATION LOGIC
 # -----------------------------
 st.subheader("📊 Allocate ₹100 Cr")
 
 alloc_A = st.slider("Startup A Allocation", 0, 100, 33)
-alloc_B = st.slider("Startup B Allocation", 0, 100, 33)
+remaining_after_A = 100 - alloc_A
+
+alloc_B = st.slider("Startup B Allocation", 0, remaining_after_A, min(33, remaining_after_A))
 alloc_C = 100 - alloc_A - alloc_B
 
 st.write(f"Startup C Allocation: {alloc_C}")
+
+# -----------------------------
+# ALLOCATION VS MODEL
+# -----------------------------
+st.subheader("📊 Allocation vs Model")
+
+alloc_dict = {
+    "Startup A": alloc_A,
+    "Startup B": alloc_B,
+    "Startup C": alloc_C
+}
+
+user_best = max(alloc_dict, key=alloc_dict.get)
+model_best = labels[best]
+
+st.write(f"Your highest allocation: {user_best}")
+st.write(f"Model recommendation: {model_best}")
+
+if user_best != model_best:
+    st.warning("⚠️ Allocation deviates from model (Behavioral bias or strategy)")
+else:
+    st.success("✅ Allocation aligns with model")
 
 # -----------------------------
 # EXPORT DATA
@@ -171,9 +197,18 @@ st.subheader("📥 Export Data (For Research)")
 df = pd.DataFrame({
     "Startup": labels,
     "Mean": means,
+    "Median": [mA[0], mB[0], mC[0]],
+    "Downside_5": [mA[2], mB[2], mC[2]],
+    "Upside_95": [mA[3], mB[3], mC[3]],
     "CVaR": cvars,
     "Chosen": [chosen]*3,
-    "Allocation": [alloc_A, alloc_B, alloc_C]
+    "Allocation": [alloc_A, alloc_B, alloc_C],
+    "Model_Best": [model_best]*3,
+    "User_Best": [user_best]*3
 })
 
-st.download_button("Download Results CSV", df.to_csv(index=False), "valuation_results.csv")
+st.download_button(
+    "Download Results CSV",
+    df.to_csv(index=False),
+    "valuation_results.csv"
+)
