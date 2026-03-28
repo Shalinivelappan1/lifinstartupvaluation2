@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="Startup Valuation Lab", layout="wide")
 
 st.title("🚀 Startup Valuation Lab (A/B/C Comparison)")
-st.write("Monte Carlo simulation + decision analytics for fintech startup valuation")
+st.write("Monte Carlo simulation + decision analytics for fintech startup valuation-Developed by Prof.Shalini Velappan, IIM Trichy")
 
 # -----------------------------
 # SIMULATION FUNCTION
